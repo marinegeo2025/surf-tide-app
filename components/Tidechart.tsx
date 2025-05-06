@@ -1,0 +1,98 @@
+import React, { useEffect, useRef } from 'react';
+
+type TidePoint = { hour: number; height: number };
+
+type Props = {
+  tideData: TidePoint[];
+  sunrise: number;
+  sunset: number;
+  twilightStart: number;
+  twilightEnd: number;
+};
+
+const TideChart: React.FC<Props> = ({
+  tideData,
+  sunrise,
+  sunset,
+  twilightStart,
+  twilightEnd
+}) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    const width = (canvas.width = 800);
+    const height = (canvas.height = 300);
+
+    const now = new Date();
+    const nowHour = now.getHours() + now.getMinutes() / 60;
+    const toX = (h: number) => (h / 24) * width;
+    const toY = (m: number) => height - (m / 5) * height;
+
+    const drawBackground = () => {
+      const grey = (start: number, end: number, color: string) => {
+        ctx.fillStyle = color;
+        ctx.fillRect(toX(start), 0, toX(end - start), height);
+      };
+      grey(0, twilightStart, '#2c2c2c');
+      grey(twilightStart, sunrise, '#5c5c5c');
+      grey(sunrise, sunset, '#f2f2f2');
+      grey(sunset, twilightEnd, '#5c5c5c');
+      grey(twilightEnd, 24, '#2c2c2c');
+    };
+
+    const drawTideLine = () => {
+      ctx.beginPath();
+      tideData.forEach((point, i) => {
+        const x = toX(point.hour);
+        const y = toY(point.height);
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.strokeStyle = '#0077b6';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+    };
+
+    const drawNowLine = () => {
+      const x = toX(nowHour);
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, height);
+      ctx.strokeStyle = '#00f';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    };
+
+    const drawYAxis = () => {
+      ctx.fillStyle = '#000';
+      ctx.font = '12px sans-serif';
+      for (let i = 0; i <= 5; i++) {
+        const y = toY(i);
+        ctx.fillText(`${i}m`, 5, y);
+        ctx.beginPath();
+        ctx.moveTo(35, y);
+        ctx.lineTo(width, y);
+        ctx.strokeStyle = '#ddd';
+        ctx.stroke();
+      }
+    };
+
+    drawBackground();
+    drawYAxis();
+    drawTideLine();
+    drawNowLine();
+  }, [tideData, sunrise, sunset, twilightStart, twilightEnd]);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{ width: '100%', maxWidth: '800px', height: 'auto' }}
+    />
+  );
+};
+
+export default TideChart;
