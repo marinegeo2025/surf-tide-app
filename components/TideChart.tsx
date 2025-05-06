@@ -16,7 +16,8 @@ const TideChart: React.FC<Props> = ({
   sunrise,
   sunset,
   twilightStart,
-  twilightEnd
+  twilightEnd,
+  highLowPoints
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
