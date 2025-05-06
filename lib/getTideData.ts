@@ -12,7 +12,7 @@ export async function getTideData(lat: number, lon: number) {
   if (!res.ok) throw new Error('Failed to fetch tide data');
 
   const data = await res.json();
-  console.log('Fetched tide data:', data); // Debug logging
+  console.log('Fetched tide data:', data); // Debug logging (trigger redeploy)
 
   const hourly = data.hourly;
   const daily = data.daily;
