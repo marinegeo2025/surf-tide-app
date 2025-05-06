@@ -5,13 +5,14 @@ export async function getTideData(lat: number, lon: number) {
   const endDate = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
   const url = `https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}` +
-    `&hourly=sea_level_height_msl&daily=sunrise,sunset&timeformat=unixtime&timezone=auto` +
-    `&start_date=${today}&end_date=${endDate}&forecast_hours=96&forecast_days=2&hourly_interval=15`;
+    `&hourly=sea_level_height_msl&daily=sunrise,sunset` +
+    `&start_date=${today}&end_date=${endDate}&timezone=auto&timeformat=unixtime`;
 
   const res = await fetch(url);
   if (!res.ok) throw new Error('Failed to fetch tide data');
 
   const data = await res.json();
+  console.log('Fetched tide data:', data); // Debug logging
 
   const hourly = data.hourly;
   const daily = data.daily;
