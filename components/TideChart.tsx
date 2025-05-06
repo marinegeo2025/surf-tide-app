@@ -8,6 +8,7 @@ type Props = {
   sunset: number;
   twilightStart: number;
   twilightEnd: number;
+  highLowPoints?: { hour: number; height: number; type: 'high' | 'low' }[];
 };
 
 const TideChart: React.FC<Props> = ({
@@ -67,6 +68,27 @@ const TideChart: React.FC<Props> = ({
       ctx.stroke();
     };
 
+const drawHighLowPoints = () => {
+  if (!highLowPoints) return;
+
+  highLowPoints.forEach((point) => {
+    const x = toX(point.hour);
+    const y = toY(point.height);
+
+    // Draw circle marker
+    ctx.beginPath();
+    ctx.arc(x, y, 5, 0, 2 * Math.PI);
+    ctx.fillStyle = point.type === 'high' ? '#ff5722' : '#2196f3';
+    ctx.fill();
+
+    // Label H or L
+    ctx.fillStyle = '#000';
+    ctx.font = 'bold 12px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(point.type === 'high' ? 'H' : 'L', x, y - 10);
+  });
+};
+
     const drawYAxis = () => {
       ctx.fillStyle = '#000';
       ctx.font = '12px sans-serif';
@@ -80,12 +102,25 @@ const TideChart: React.FC<Props> = ({
         ctx.stroke();
       }
     };
+const drawXAxis = () => {
+  ctx.fillStyle = '#000';
+  ctx.font = '12px sans-serif';
+  ctx.textAlign = 'center';
+
+  for (let h = 0; h <= 24; h++) {
+    const x = (h / 24) * width;
+    const label = h === 0 || h === 24 ? '12' : `${h % 12 || 12}`;
+    ctx.fillText(label, x, height - 5);
+  }
+};
 
     drawBackground();
     drawYAxis();
+    drawXAxis();    
     drawTideLine();
+    drawHighLowPoints();
     drawNowLine();
-  }, [tideData, sunrise, sunset, twilightStart, twilightEnd]);
+  }, [tideData, sunrise, sunset, twilightStart, twilightEnd, highLowPoints]);
 
   return (
     <canvas
