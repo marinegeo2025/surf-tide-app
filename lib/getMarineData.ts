@@ -28,7 +28,7 @@ export async function getMarineData(latitude: number, longitude: number) {
     `&start_date=${today}&end_date=${tomorrow}` +
     `&timezone=auto`;
 
-  console.log('Fetching from:', url);
+  console.log('[getMarineData] Fetching from:', url);
   const res = await fetch(url);
   if (!res.ok) {
     throw new Error(`Failed to fetch marine data. Status: ${res.status}`);
