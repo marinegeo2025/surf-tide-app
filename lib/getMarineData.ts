@@ -25,9 +25,9 @@ export async function getMarineData(latitude: number, longitude: number) {
   `latitude=${latitude}&longitude=${longitude}` +
   `&hourly=sea_level_height_msl,wave_height,wave_direction,wave_period` +
   `&daily=sunrise,sunset` +
-  `&start_date=${today}&end_date=${tomorrow}` +
-  `&forecast_days=2` +  // ✅ Add this
-  `&timezone=auto`;
+  `&start_date=${today}&end_date=${tomorrow}` +  // ✅ KEEP THESE
+  `&timezone=auto`;                               // ✅ REMOVE forecast_days
+
 
   console.log('[getMarineData] Fetching from:', url);
   const res = await fetch(url);
