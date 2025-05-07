@@ -23,7 +23,7 @@ export async function getMarineData(latitude: number, longitude: number) {
   // Add or remove variables as needed:
   const url = `https://marine-api.open-meteo.com/v1/marine?` +
   `latitude=${latitude}&longitude=${longitude}` +
-  `&hourly=sea_level_height_msl,wave_height,wave_direction,wave_period` +
+  `&hourly=wave_height,wave_direction,wave_period,sea_level_height_msl` +
   `&daily=sunrise,sunset` +
   `&forecast_days=2` +
   `&timezone=auto`;
