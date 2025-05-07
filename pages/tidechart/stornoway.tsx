@@ -1,68 +1,76 @@
 // File: pages/tidechart/stornoway.tsx
+
 import { useEffect, useState } from 'react';
-import TideChart from '../../components/TideChart';
-import { getTideData } from '../../lib/getTideData';
+import { getMarineData, MarineDataPoint, SunTimes } from '../../lib/getMarineData';
+import TideChart from '../../components/TideChart'; // The same TideChart from your example
 
 const STORNOWAY_LAT = 58.215;
 const STORNOWAY_LON = -6.387;
 
 export default function StornowayTideChartPage() {
   const [tideData, setTideData] = useState<{ hour: number; height: number }[]>([]);
-  const [sunTimes, setSunTimes] = useState<{ sunrise: Date; sunset: Date } | null>(null);
-  const [highLowPoints, setHighLowPoints] = useState<{ hour: number; height: number; type: 'high' | 'low' }[]>([]);
+  const [waveData, setWaveData] = useState<MarineDataPoint[]>([]); // For debugging or wave chart
+  const [sunTimes, setSunTimes] = useState<SunTimes | null>(null);
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const data = await getTideData(STORNOWAY_LAT, STORNOWAY_LON);
+        // Fetch combined tide + wave data
+        const { marineData, sunTimes } = await getMarineData(STORNOWAY_LAT, STORNOWAY_LON);
+
+        // Debug: log wave data to see if everything arrives
+        console.log('Marine data (raw):', marineData);
+
+        // Filter for "today" only, and convert to chart-friendly data
         const now = new Date();
-        const today = now.toDateString();
+        const todayStr = now.toDateString();
+        const todaysData = marineData.filter(d => d.time.toDateString() === todayStr);
 
-        const condensed = data.tideData
-          .filter(d => d.time.toDateString() === today)
-          .map(d => ({
-            hour: d.time.getHours() + d.time.getMinutes() / 60,
-            height: d.height
-          }));
+        // Create the { hour, height } structure for the tide chart
+        const condensedTide = todaysData.map(d => ({
+          hour: d.time.getHours() + d.time.getMinutes() / 60,
+          height: d.tideHeight || 0,
+        }));
 
-        setTideData(condensed);
-        setSunTimes(data.sunTimes);
-
-        // Find highs and lows
-        const highLow: { hour: number; height: number; type: 'high' | 'low' }[] = [];
-        for (let i = 1; i < condensed.length - 1; i++) {
-          const prev = condensed[i - 1];
-          const curr = condensed[i];
-          const next = condensed[i + 1];
-          if (curr.height > prev.height && curr.height > next.height) {
-            highLow.push({ ...curr, type: 'high' });
-          } else if (curr.height < prev.height && curr.height < next.height) {
-            highLow.push({ ...curr, type: 'low' });
-          }
+        setTideData(condensedTide);
+        setWaveData(todaysData); // could be used in a separate WaveChart
+        if (sunTimes) {
+          setSunTimes(sunTimes);
         }
-
-        setHighLowPoints(highLow);
       } catch (error) {
-        console.error('Failed to fetch tide data:', error);
+        console.error('Failed to fetch marine data:', error);
       }
     }
 
     fetchData();
   }, []);
 
-  if (!tideData.length || !sunTimes) return <p>Loading tide data...</p>;
+  // If you specifically need to wait for both tideData and sunTimes
+  if (!tideData.length || !sunTimes) {
+    return <p>Loading tide data...</p>;
+  }
 
   return (
     <div style={{ padding: '2rem' }}>
-      <h1 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>Stornoway Tide Chart</h1>
+      <h1 style={{ fontSize: '1.5rem', marginBottom: '1rem' }}>
+        Stornoway Tide & Wave Data
+      </h1>
+
+      {/* Renders the existing TideChart from your example. 
+          If you'd like wave data in the same chart, 
+          you can modify the <TideChart> component to accept wave data props. */}
       <TideChart
         tideData={tideData}
         sunrise={sunTimes.sunrise.getHours() + sunTimes.sunrise.getMinutes() / 60}
         sunset={sunTimes.sunset.getHours() + sunTimes.sunset.getMinutes() / 60}
         twilightStart={sunTimes.sunrise.getHours() - 1}
         twilightEnd={sunTimes.sunset.getHours() + 1}
-        highLowPoints={highLowPoints}
       />
+
+      {/* If you want to debug wave data, you could render or console.log it here */}
+      <pre style={{ whiteSpace: 'pre-wrap', marginTop: '1rem' }}>
+        {JSON.stringify(waveData, null, 2)}
+      </pre>
     </div>
   );
 }
