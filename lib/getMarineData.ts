@@ -28,8 +28,6 @@ export async function getMarineData(latitude: number, longitude: number) {
   `&forecast_days=2` +
   `&timezone=auto`;
 
-
-
   console.log('[getMarineData] Fetching from:', url);
   const res = await fetch(url);
   if (!res.ok) {
