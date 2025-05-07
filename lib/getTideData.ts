@@ -5,8 +5,10 @@ export async function getTideData(lat: number, lon: number) {
   const endDate = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 
   const url = `https://marine-api.open-meteo.com/v1/marine?latitude=${lat}&longitude=${lon}` +
-    `&hourly=sea_level_height_msl&daily=sunrise,sunset` +
-    `&start_date=${today}&end_date=${endDate}&timezone=auto&timeformat=unixtime`;
+  `&hourly=sea_level_height_msl&daily=sunrise,sunset` +
+  `&start_date=${today}&end_date=${endDate}&timezone=auto&timeformat=unixtime`;
+
+console.log('Tide API URL:', url); // ✅ Add this
 
   const res = await fetch(url);
   if (!res.ok) throw new Error('Failed to fetch tide data');
