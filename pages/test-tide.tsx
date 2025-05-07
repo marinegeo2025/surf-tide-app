@@ -12,7 +12,7 @@ export default function TestTide() {
         console.log('Tide Result:', result);
         setData(result);
       } catch (err: any) {
-        console.error(err);
+        console.error('Tide fetch error:', err);
         setError(err.message || 'Unknown error');
       }
     }
@@ -25,7 +25,7 @@ export default function TestTide() {
 
   return (
     <div style={{ padding: '2rem' }}>
-      <h1>Test Tide Data (debug) </h1>
+      <h1>Test Tide Data (debug)</h1>
       <pre style={{ whiteSpace: 'pre-wrap', fontSize: '12px' }}>
         {JSON.stringify(data, null, 2)}
       </pre>
