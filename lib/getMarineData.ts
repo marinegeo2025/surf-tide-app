@@ -22,11 +22,12 @@ export async function getMarineData(latitude: number, longitude: number) {
   // In "hourly", we include tide + wave variables
   // Add or remove variables as needed:
   const url = `https://marine-api.open-meteo.com/v1/marine?` +
-    `latitude=${latitude}&longitude=${longitude}` +
-    `&hourly=sea_level_height_msl,wave_height,wave_direction,wave_period` +
-    `&daily=sunrise,sunset` +
-    `&start_date=${today}&end_date=${tomorrow}` +
-    `&timezone=auto`;
+  `latitude=${latitude}&longitude=${longitude}` +
+  `&hourly=sea_level_height_msl,wave_height,wave_direction,wave_period` +
+  `&daily=sunrise,sunset` +
+  `&start_date=${today}&end_date=${tomorrow}` +
+  `&forecast_days=2` +  // ✅ Add this
+  `&timezone=auto`;
 
   console.log('[getMarineData] Fetching from:', url);
   const res = await fetch(url);
