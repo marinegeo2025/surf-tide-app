@@ -2,7 +2,7 @@
 
 export interface MarineDataPoint {
   time: Date;
-  tideHeight: number | null;  // sea_level_height_msl
+  tideHeight: number | null;   // from tide_height
   waveHeight: number | null;
   waveDirection: number | null;
   wavePeriod: number | null;
@@ -15,39 +15,32 @@ export interface SunTimes {
 }
 
 export async function getMarineData(latitude: number, longitude: number) {
-  // Example: fetch for "today" and "tomorrow"
-  const today = new Date().toISOString().split('T')[0];
-  const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-
-  // In "hourly", we include tide + wave variables
-  // Add or remove variables as needed:
+  // We'll fetch marine data from open-meteo's marine endpoint:
   const url =
-  "https://marine-api.open-meteo.com/v1/marine?" +
-  `latitude=${latitude}&longitude=${longitude}` +
-  `&hourly=wave_height,wave_direction,wave_period,tide_height` +
-  `&daily=sunrise,sunset` +
-  `&forecast_days=2` +
-  `&timezone=auto`;
+    "https://marine-api.open-meteo.com/v1/marine?" +
+    `latitude=${latitude}&longitude=${longitude}` +
+    `&hourly=wave_height,wave_direction,wave_period,tide_height` +  // <--- use tide_height
+    `&daily=sunrise,sunset` +
+    `&forecast_days=2` +
+    `&timezone=auto`;
 
-
-  console.log('[getMarineData] Fetching from:', url);
+  console.log("[getMarineData] Fetching from:", url);
   const res = await fetch(url);
   if (!res.ok) {
     throw new Error(`Failed to fetch marine data. Status: ${res.status}`);
   }
 
   const data = await res.json();
-  console.log('Fetched marine data:', data);
+  console.log("Fetched marine data:", data);
 
-  // "hourly" contains arrays for time and each variable
-  // If the array for a variable is missing, fill with null
+  // Hourly arrays (each index corresponds to the same hour)
   const times: string[] = data.hourly?.time || [];
-  const tideHeights: number[] = data.hourly?.sea_level_height_msl || [];
+  const tideHeights: number[] = data.hourly?.tide_height || [];      // <--- updated
   const waveHeights: number[] = data.hourly?.wave_height || [];
   const waveDirections: number[] = data.hourly?.wave_direction || [];
   const wavePeriods: number[] = data.hourly?.wave_period || [];
 
-  // Convert arrays into an array of objects
+  // Convert those arrays into an array of MarineDataPoint
   const marineData: MarineDataPoint[] = times.map((timeStr, i) => ({
     time: new Date(timeStr),
     tideHeight: tideHeights[i] ?? null,
@@ -56,7 +49,7 @@ export async function getMarineData(latitude: number, longitude: number) {
     wavePeriod: wavePeriods[i] ?? null,
   }));
 
-  // Sunrise/sunset if available (daily)
+  // Pull out sunrise/sunset from the daily data if available
   let sunTimes: SunTimes | null = null;
   if (data.daily && data.daily.sunrise && data.daily.sunrise[0]) {
     sunTimes = {
