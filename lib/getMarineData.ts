@@ -15,12 +15,13 @@ export interface SunTimes {
 
 export async function getMarineData(latitude: number, longitude: number) {
   const url =
-    "https://marine-api.open-meteo.com/v1/marine?" +
-    `latitude=${latitude}&longitude=${longitude}` +
-    `&hourly=wave_height,wave_direction,wave_period,tide_height` +
-    `&daily=sunrise,sunset` +
-    `&forecast_days=2` +
-    `&timezone=auto`;
+  "https://marine-api.open-meteo.com/v1/marine?" +
+  `latitude=${latitude}&longitude=${longitude}` +
+  `&hourly=wave_height,wave_direction,wave_period,sea_level_height_msl` +  // ✅ use this
+  `&daily=sunrise,sunset` +
+  `&forecast_days=2` +
+  `&timezone=auto`;
+
 
   console.log("[getMarineData] Fetching from:", url);
   const res = await fetch(url);
@@ -32,7 +33,7 @@ export async function getMarineData(latitude: number, longitude: number) {
   console.log("Fetched marine data:", data);
 
   const times: string[] = data.hourly?.time || [];
-  const tideHeights: number[] = data.hourly?.tide_height || [];
+  const tideHeights: number[] = data.hourly?.sea_level_height_msl || [];
   const waveHeights: number[] = data.hourly?.wave_height || [];
   const waveDirections: number[] = data.hourly?.wave_direction || [];
   const wavePeriods: number[] = data.hourly?.wave_period || [];
